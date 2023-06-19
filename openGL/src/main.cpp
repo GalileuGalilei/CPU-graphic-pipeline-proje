@@ -19,7 +19,6 @@ int screenHeight = 500;
 void render()
 {
    mesh->Draw();  
-   mesh->transform = mesh->transform * rotation;
    Mesh::resetZBuffer();
 }
 
@@ -35,20 +34,20 @@ int main(void)
     Float4x4 aux;
 
     Mesh::SetScreen(screenWidth, screenHeight);
-    mesh->GenerateCube();
+    mesh->Load("piston_gas_engine.obj");
 
-    aux.GeneratePerpectiveMatrix(200, 100);
+    aux.GeneratePerpectiveMatrix(180, 100);
     mesh->transform = mesh->transform * aux;
 
-    aux.GenerateTranslationMatrix(250, 250, -150);
+    aux.GenerateTranslationMatrix(400, 250, -200);
     mesh->transform = mesh->transform * aux;
 
-    aux.GenerateScaleMatrix(50);
+    aux.GenerateScaleMatrix(20);
     mesh->transform = mesh->transform * aux;
 
-    aux.GenerateRotationMatrix(Vector3(1, 1, 1), 0.01);
-    rotation = rotation * aux;
+    aux.GenerateRotationMatrix(Vector3(0, 1, 0), 3.1415 / 2);
+    mesh->transform = mesh->transform * aux;
 
-   CV::init(&screenWidth, &screenHeight, "Cube (by now...)");
+   CV::init(&screenWidth, &screenHeight, "simple obj");
    CV::run();
 }

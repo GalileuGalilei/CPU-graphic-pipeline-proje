@@ -74,7 +74,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)openGL\include</AdditionalIncludeDirectories>
     </ClCompile>
@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="openGL\src\ObjLoader.cpp" />
     <ClCompile Include="openGL\src\gl_canvas2d.cpp" />
     <ClCompile Include="openGL\src\main.cpp" />
     <ClCompile Include="openGL\src\Matrices.cpp" />
@@ -137,6 +138,7 @@
     <ClCompile Include="openGL\src\Vectors.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="openGL\include\ObjLoader.h" />
     <ClInclude Include="openGL\include\gl_canvas2d.h" />
     <ClInclude Include="openGL\include\Matrices.h" />
     <ClInclude Include="openGL\include\Mesh.h" />

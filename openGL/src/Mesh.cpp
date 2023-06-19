@@ -1,6 +1,11 @@
 #include "Mesh.h"
 #include <algorithm>
 
+Vector3 lerp(Vector3 a, Vector3 b, float t)
+{
+	return a + (b - a) * t;
+}
+
 int** Mesh::zBuffer = NULL;
 
 int Mesh::screenWidth = 0;
@@ -59,9 +64,19 @@ void Mesh::GenerateCube()
 	triangles.push_back(Triangle(0, 7, 4));
 }
 
-Vector3 lerp(Vector3 a, Vector3 b, float t)
+void Mesh::Load(const char* filename)
 {
-	return a + (b - a) * t;
+	ObjLoader loader;
+	loader.Load(filename);
+
+	for (int i = 0; i < loader.vertices.size(); i++)
+	{
+		vertices.push_back(Vector4(loader.vertices[i].x, loader.vertices[i].y, loader.vertices[i].z, 1));
+	}
+	for (int i = 0; i < loader.triangles.size(); i += 3)
+	{
+		triangles.push_back(Triangle(loader.triangles[i], loader.triangles[i + 1], loader.triangles[i + 2]));
+	}
 }
 
 void Mesh::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3)

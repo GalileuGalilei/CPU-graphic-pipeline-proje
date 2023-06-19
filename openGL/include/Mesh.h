@@ -1,8 +1,9 @@
 #pragma once
 #include "Vectors.h"
 #include "Matrices.h"
+#include "ObjLoader.h"
 #include "gl_canvas2d.h"
-#include <vector>
+
 
 struct Triangle
 {
@@ -31,6 +32,8 @@ public:
 	//dps faz o resto
 
 	void GenerateCube();
+
+	void Load(const char* filename);
 
 	void DrawTriangle(Vector3 a, Vector3 b, Vector3 c);
 
