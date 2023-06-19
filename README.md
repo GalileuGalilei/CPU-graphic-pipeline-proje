@@ -1,4 +1,4 @@
-# CPU-graphic-pipeline-proje
+# CPU-graphic-pipeline-project
  This project aims to emulate the OpenGL GPU graphics pipeline on the CPU by implementing triangle-based pixel-by-pixel rasterization.
  
 
