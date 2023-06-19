@@ -37,11 +37,8 @@ void ObjLoader::Load(const char* filename)
 		else if (strcmp(currentStr, "f") == 0)
 		{
 			int vertexIndex[3];
-			int t; //trash
-			fscanf(file, "%i %i %i\n", 
-				&vertexIndex[0], 
-				&vertexIndex[1], 
-				&vertexIndex[2]);
+
+			fscanf(file, "%i %i %i\n", &vertexIndex[0], &vertexIndex[1], &vertexIndex[2]);
 			triangles.push_back(vertexIndex[0] - 1);
 			triangles.push_back(vertexIndex[1] - 1);
 			triangles.push_back(vertexIndex[2] - 1);
