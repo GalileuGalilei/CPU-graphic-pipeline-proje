@@ -17,29 +17,45 @@ struct Triangle
 	}
 };
 
+struct Vertex
+{
+	Vector4 position;
+	Vector4 normal;
+};
+
 class Mesh
 {
 private:
 	static int** zBuffer;
+	static Vector3 lightSource;
 	static int screenWidth, screenHeight;
+
+	Vertex Interpolate(Vertex& a, Vertex& b, float t);
+
+	//vertex shader equivalent
+	void DrawTriangle(Vertex a, Vertex b, Vertex c);
+
+	//fragment shader equivalent
+	void DrawPixel(Vertex& interpolated);
 
 public:
 
-	std::vector<Vector4> vertices;
-	//std::vector<Edge> edges;
+	std::vector<Vertex> vertices;
 	std::vector<Triangle> triangles;
-	Float4x4 transform;//transformacao do objeto
-	//dps faz o resto
-
-	void GenerateCube();
+	Vector3 color; //cor do objeto
+	Float4x4 transform; //transformacao do objeto
 
 	void Load(const char* filename);
-
-	void DrawTriangle(Vector3 a, Vector3 b, Vector3 c);
 
 	void Draw();
 
 	static void SetScreen(int screenWidth, int screenHeight);
+	static void SetLightSource(Vector3 lightSource);
 	static void resetZBuffer();
+
+	template <typename T> T lerp(T a, T b, float t)
+	{
+		return a + (b - a) * t;
+	}
 };
 

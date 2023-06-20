@@ -18,8 +18,11 @@ int screenHeight = 500;
 
 void render()
 {
-   mesh->Draw();  
-   Mesh::resetZBuffer();
+    CV::color(0, 0, 0);
+    CV::rectFill(0, 0, screenWidth, screenHeight);
+    mesh->Draw();  
+    mesh->transform = mesh->transform * rotation;
+    Mesh::resetZBuffer();
 }
 
 void keyboard(int key){}
@@ -34,19 +37,21 @@ int main(void)
     Float4x4 aux;
 
     Mesh::SetScreen(screenWidth, screenHeight);
-    mesh->Load("piston_gas_engine.obj");
+    Mesh::SetLightSource(Vector3(1, 1, 1));
+    mesh->Load("cube.obj");
+    mesh->color = Vector3(1, 1, 1);
 
-    aux.GeneratePerpectiveMatrix(180, 100);
+    aux.GeneratePerpectiveMatrix(200, 100);
     mesh->transform = mesh->transform * aux;
 
-    aux.GenerateTranslationMatrix(400, 250, -200);
+    aux.GenerateTranslationMatrix(200, 250, -250);
     mesh->transform = mesh->transform * aux;
 
-    aux.GenerateScaleMatrix(20);
+    aux.GenerateScaleMatrix(100);
     mesh->transform = mesh->transform * aux;
 
-    aux.GenerateRotationMatrix(Vector3(0, 1, 0), 3.1415 / 2);
-    mesh->transform = mesh->transform * aux;
+    aux.GenerateRotationMatrix(Vector3(0, 1, -0.5), 0.1);
+    rotation = aux;
 
    CV::init(&screenWidth, &screenHeight, "simple obj");
    CV::run();

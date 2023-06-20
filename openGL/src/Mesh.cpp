@@ -1,11 +1,6 @@
 #include "Mesh.h"
 #include <algorithm>
 
-Vector3 lerp(Vector3 a, Vector3 b, float t)
-{
-	return a + (b - a) * t;
-}
-
 int** Mesh::zBuffer = NULL;
 
 int Mesh::screenWidth = 0;
@@ -28,40 +23,23 @@ void Mesh::SetScreen(int screenWidth, int screenHeight)
 	resetZBuffer();
 }	
 
+Vector3 Mesh::lightSource = Vector3(0, 0, 1);
+
+void Mesh::SetLightSource(Vector3 lightSource)
+{
+	Mesh::lightSource = lightSource;
+}
+
 void Mesh::resetZBuffer()
 {
 	for (int i = 0; i < Mesh::screenWidth; i++)
 	{
 		for (int j = 0; j < Mesh::screenHeight; j++)
 		{
-			zBuffer[i][j] = 0;
+			zBuffer[i][j] = -99999;
+			int a =2;
 		}
 	}
-}
-
-void Mesh::GenerateCube()
-{
-	vertices.push_back(Vector4(-0.5f, -0.5f, -0.5f, 1));
-	vertices.push_back(Vector4(-0.5f, 0.5f, -0.5f, 1));
-	vertices.push_back(Vector4(0.5f, 0.5f, -0.5f, 1));
-	vertices.push_back(Vector4(0.5f, -0.5f, -0.5f, 1));
-	vertices.push_back(Vector4(-0.5f, -0.5f, 0.5f, 1));
-	vertices.push_back(Vector4(-0.5f, 0.5f, 0.5f, 1));
-	vertices.push_back(Vector4(0.5f, 0.5f, 0.5f, 1));
-	vertices.push_back(Vector4(0.5f, -0.5f, 0.5f, 1));
-
-	triangles.push_back(Triangle(0, 1, 2));
-	triangles.push_back(Triangle(0, 2, 3));
-	triangles.push_back(Triangle(4, 6, 5));
-	triangles.push_back(Triangle(4, 7, 6));
-	triangles.push_back(Triangle(0, 4, 1));
-	triangles.push_back(Triangle(1, 4, 5));
-	triangles.push_back(Triangle(1, 5, 2));
-	triangles.push_back(Triangle(2, 5, 6));
-	triangles.push_back(Triangle(2, 6, 3));
-	triangles.push_back(Triangle(3, 6, 7));
-	triangles.push_back(Triangle(3, 7, 0));
-	triangles.push_back(Triangle(0, 7, 4));
 }
 
 void Mesh::Load(const char* filename)
@@ -71,7 +49,11 @@ void Mesh::Load(const char* filename)
 
 	for (int i = 0; i < loader.vertices.size(); i++)
 	{
-		vertices.push_back(Vector4(loader.vertices[i].x, loader.vertices[i].y, loader.vertices[i].z, 1));
+		Vertex v;
+		v.position = Vector4(loader.vertices[i].x, loader.vertices[i].y, loader.vertices[i].z, 1);
+		v.normal = Vector4(loader.normals[i].x, loader.normals[i].y, loader.normals[i].z, 0);
+
+		vertices.push_back(v);
 	}
 	for (int i = 0; i < loader.triangles.size(); i += 3)
 	{
@@ -79,14 +61,42 @@ void Mesh::Load(const char* filename)
 	}
 }
 
-void Mesh::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
+Vertex Mesh::Interpolate(Vertex& a, Vertex& b, float t)
 {
-	CV::color(0, 0, 0);
+	Vertex v;
+	v.position = lerp(a.position, b.position, t);
+	v.normal = lerp(a.normal, b.normal, t);
+	
+	return v;
+}
+
+void Mesh::DrawPixel(Vertex& i)
+{
+	int x = (int)i.position.x;
+	int y = (int)i.position.y;
+
+	Vector3 lightDir = lightSource - i.position;
+	lightDir.Normalize();
+	Vector3 normal = i.normal;
+	normal.Normalize();
+	float intensity = std::max(normal.Dot(lightDir), 0.0f);
+	//CV::color(color.x * intensity, color.y * intensity, color.z * intensity);
+	//CV::color(1, 1, 1);
+	glVertex2d(x, y);
+}
+
+void Mesh::DrawTriangle(Vertex a, Vertex b, Vertex c)
+{
 	glBegin(GL_POINTS);
+
 	//ordena os pontos do menor para o maior y.
-	if (p1.y > p2.y) std::swap(p1, p2);
-	if (p1.y > p3.y) std::swap(p1, p3);
-	if (p2.y > p3.y) std::swap(p2, p3);
+	if(a.position.y > b.position.y) std::swap(a, b);
+	if(a.position.y > c.position.y) std::swap(a, c);
+	if(b.position.y > c.position.y) std::swap(b, c);
+
+	Vector3 p1 = a.position;
+	Vector3 p2 = b.position;
+	Vector3 p3 = c.position;
 
 	int totalHeight = (int)p3.y - (int)p1.y + 1;
 	int segmentHeight = (int)p2.y - (int)p1.y + 1;
@@ -103,7 +113,7 @@ void Mesh::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
 		Vector3 B = dirB * beta + p1;
 		if (A.x > B.x) std::swap(A, B);
 
-		int horizontalSegment = B.x - A.x;
+		int horizontalSegment = B.x - A.x + 1;
 
 		for (int x = A.x; x < B.x; x++)
 		{
@@ -112,13 +122,18 @@ void Mesh::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
 				continue;
 			}
 
-			int gama = (float)(x - (int)A.x) / horizontalSegment;
-			Vector3 C = lerp(A, B, gama);
+			float gama = (float)(x - (int)A.x) / horizontalSegment;
 
-			if (zBuffer[x][y] > C.z)
+			Vertex v1 = Interpolate(a, c, alpha);
+			Vertex v2 = Interpolate(a, b, beta);
+			Vertex v3 = Interpolate(v1, v2, gama);
+
+			if (zBuffer[x][y] < v3.position.z)
 			{
-				glVertex2i(x, y);
-				zBuffer[x][y] = C.z;
+				v3.position.x = x;
+				v3.position.y = y;
+				DrawPixel(v3);
+				zBuffer[x][y] = v3.position.z;
 			}
 		}
 	}
@@ -137,7 +152,7 @@ void Mesh::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
 		Vector3 B = dirB * beta + p2;
 		if (A.x > B.x) std::swap(A, B);
 
-		int horizontalSegment = B.x - A.x;
+		int horizontalSegment = B.x - A.x + 1;
 
 		for (int x = A.x; x < B.x; x++)
 		{
@@ -147,12 +162,17 @@ void Mesh::DrawTriangle(Vector3 p1, Vector3 p2, Vector3 p3)
 			}
 
 			float gama = (float)(x - (int)A.x) / horizontalSegment;
-			Vector3 C = lerp(A, B, gama);
 
-			if (zBuffer[x][y] > C.z)
+			Vertex v1 = Interpolate(a, c, alpha);
+			Vertex v2 = Interpolate(b, c, beta);
+			Vertex v3 = Interpolate(v1, v2, gama);
+
+			if (zBuffer[x][y] < v3.position.z)
 			{
-				glVertex2i(x, y);
-				zBuffer[x][y] = C.z;
+				v3.position.x = x;
+				v3.position.y = y;
+				DrawPixel(v3);
+				zBuffer[x][y] = v3.position.z;
 			}
 		}
 	}
@@ -165,16 +185,28 @@ void Mesh::Draw()
 	Vector4 center = Vector4((float)screenWidth / 2, (float)screenHeight / 2, 0, 0);
 
 	CV::color(0, 0, 0);
-	for (Triangle t : triangles)
+	for(int i = 0; i < triangles.size(); i++)
 	{
-		Vector4 a = transform * vertices[t.a] - center;
-		Vector4 b = transform * vertices[t.b] - center;
-		Vector4 c = transform * vertices[t.c] - center;
+		Triangle t = triangles[i];
+		Vertex v1;
+		Vertex v2;
+		Vertex v3;
 
-		Vector3 p1 = Vector3(a.x / a.w, a.y / a.w, a.z) + center;
-		Vector3 p2 = Vector3(b.x / b.w, b.y / b.w, b.z) + center;
-		Vector3 p3 = Vector3(c.x / c.w, c.y / c.w, c.z) + center;
+		Vector4 a = transform * vertices[t.a].position - center;
+		Vector4 b = transform * vertices[t.b].position - center;
+		Vector4 c = transform * vertices[t.c].position - center;
 
-		DrawTriangle(p1, p2, p3);
+		//não funciona com escalas não homogeneas
+		v1.normal = transform * vertices[t.a].normal / a.w;
+		v2.normal = transform * vertices[t.b].normal / b.w;
+		v3.normal = transform * vertices[t.c].normal / c.w;
+
+		v1.position = Vector4(a.x / a.w, a.y / a.w, a.z, a.w) + center;
+		v2.position = Vector4(b.x / b.w, b.y / b.w, b.z, b.w) + center;
+		v3.position = Vector4(c.x / c.w, c.y / c.w, c.z, c.w) + center;
+
+		float color = (float)i / triangles.size();
+		CV::color(color, color, color);
+		DrawTriangle(v1, v2, v3);
 	}
 }

@@ -38,6 +38,15 @@ public:
 		return Vector4(y * other.z - z * other.y, z * other.x - x * other.z, x * other.y - y * other.x, 0);
 	}
 
+	void Normalize()
+	{
+		float m = sqrt(x * x + y * y + z * z + w * w);
+		x = x / m;
+		y = y / m;
+		z = z / m;
+		w = w / m;
+	}
+
 	Vector4 operator * (float s)
 	{
 		return Vector4(x * s, y * s, z * s, w * s);
@@ -135,7 +144,7 @@ public:
 		z /= norm;
 	}
 
-	int Dot(const Vector3& v)
+	float Dot(const Vector3& v)
 	{
 		return(x * v.x + y * v.y + z * v.z);
 	}
@@ -169,6 +178,18 @@ public:
 	Vector3 operator + (const Vector3& v)
 	{
 		Vector3 aux(x + v.x, y + v.y, z + v.z);
+		return(aux);
+	}
+
+	Vector3 operator += (const Vector3& v)
+	{
+		Vector3 aux(x += v.x, y += v.y, z += v.z);
+		return(aux);
+	}
+
+	Vector3 operator -= (const Vector3& v)
+	{
+		Vector3 aux(x -= v.x, y -= v.y, z -= v.z);
 		return(aux);
 	}
 };
