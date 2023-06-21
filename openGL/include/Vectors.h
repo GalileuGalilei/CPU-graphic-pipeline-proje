@@ -255,6 +255,11 @@ public:
 		y /= norm;
 	}
 
+	float Dot(const Vector2& v)
+	{
+		return(x * v.x + y * v.y);
+	}
+
 	Vector2 operator - (const Vector2& v)
 	{
 		Vector2 aux(x - v.x, y - v.y);

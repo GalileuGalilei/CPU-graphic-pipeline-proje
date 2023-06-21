@@ -30,7 +30,7 @@ private:
 	static Vector3 lightSource;
 	static int screenWidth, screenHeight;
 
-	Vertex Interpolate(Vertex& a, Vertex& b, float t);
+	Vertex Interpolate(Vertex& a, Vertex& b, Vertex& c, float u, float v);
 
 	//vertex shader equivalent
 	void DrawTriangle(Vertex a, Vertex b, Vertex c);
@@ -55,6 +55,11 @@ public:
 
 	template <typename T> T lerp(T a, T b, float t)
 	{
+		if (t > 1 || t < 0)
+		{
+			printf("ERRO DE LERP");
+			return a;
+		}
 		return a + (b - a) * t;
 	}
 };

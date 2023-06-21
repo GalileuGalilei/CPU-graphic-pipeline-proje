@@ -38,7 +38,7 @@ int main(void)
 
     Mesh::SetScreen(screenWidth, screenHeight);
     Mesh::SetLightSource(Vector3(1, 1, 1));
-    mesh->Load("cube.obj");
+    mesh->Load("monkey.obj");
     mesh->color = Vector3(1, 1, 1);
 
     aux.GeneratePerpectiveMatrix(200, 100);
@@ -52,6 +52,7 @@ int main(void)
 
     aux.GenerateRotationMatrix(Vector3(0, 1, -0.5), 0.1);
     rotation = aux;
+    mesh->transform = mesh->transform * aux;
 
    CV::init(&screenWidth, &screenHeight, "simple obj");
    CV::run();
