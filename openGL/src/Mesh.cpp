@@ -74,14 +74,15 @@ void Mesh::DrawPixel(Vertex& i)
 {
 	int x = (int)i.position.x;
 	int y = (int)i.position.y;
+	const float ambientLight = 0.2f;
 
 	Vector3 lightDir = lightSource - i.position;
 	lightDir.Normalize();
 	Vector3 normal = i.normal;
 	normal.Normalize();
-	float intensity = std::max(normal.Dot(lightDir), 0.0f);
-	CV::color(color.x * intensity, color.y * intensity, color.z * intensity);
-	//CV::color(1, 1, 1);
+
+	float intensity = std::max(normal.Dot(lightDir), ambientLight);
+	glColor3f(color.x * intensity, color.y * intensity, color.z * intensity);
 	glVertex2d(x, y);
 }
 
@@ -100,8 +101,6 @@ Vector3 Barycentric(Vector4& a, Vector4& b, Vector4& c, Vector2& point)
 
 void Mesh::DrawTriangle(Vertex a, Vertex b, Vertex c)
 {
-	glBegin(GL_POINTS);
-
 	//encontra a bounds box
 	int minX = std::min(a.position.x, std::min(b.position.x, c.position.x));
 	int maxX = std::max(a.position.x, std::max(b.position.x, c.position.x));
@@ -130,12 +129,11 @@ void Mesh::DrawTriangle(Vertex a, Vertex b, Vertex c)
 			}
 		}
 	}
-
-	glEnd();
 }
 
 void Mesh::Draw()
 {
+	glBegin(GL_POINTS);
 	Vector4 center = Vector4((float)screenWidth / 2, (float)screenHeight / 2, 0, 0);
 
 	CV::color(0, 0, 0);
@@ -163,4 +161,5 @@ void Mesh::Draw()
 		CV::color(color, color, color);
 		DrawTriangle(v1, v2, v3);
 	}
+	glEnd();
 }
