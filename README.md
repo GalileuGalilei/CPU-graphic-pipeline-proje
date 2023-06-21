@@ -9,4 +9,7 @@ Current its possible only render triangulated meshs without any kind of lighting
 
 Here is a example of what the current pipeline is capable of.
 
-![sample](https://github.com/GalileuGalilei/CPU-graphic-pipeline-project/assets/76018038/74b74904-2389-4fa5-9699-86be9ab140bd)
+![monkey](https://github.com/GalileuGalilei/CPU-graphic-pipeline-project/assets/76018038/dc32e9bb-0a6b-4c8f-89a5-1c53c8ff602f)
+
+
+
